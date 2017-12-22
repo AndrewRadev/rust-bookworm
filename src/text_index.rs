@@ -9,6 +9,7 @@ pub trait Indexable: Eq + Hash {
 }
 
 impl Indexable for String {
+    // TODO needs to be an Iterator of some sort. Maybe when it uses Trigrams
     fn extract_words(&self) -> Vec<String> {
         util::WordIterator::new(self).map(String::from).collect()
     }
