@@ -1,10 +1,11 @@
 use std::collections::{HashSet, HashMap};
 use std::rc::Rc;
 use std::hash::Hash;
+use std::fmt::Debug;
 
 use util;
 
-pub trait Indexable: Eq + Hash {
+pub trait Indexable: Debug + Eq + Hash {
     fn extract_words(&self) -> Vec<String>;
 }
 
@@ -31,6 +32,7 @@ impl<T: Indexable> TextIndex<T> {
     }
 
     pub fn push(&mut self, indexable: T) {
+        println!("[DEBUG] Pushing into index: {:?}", indexable);
         let indexable = Rc::new(indexable);
 
         for word in indexable.extract_words() {

@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::collections::HashSet;
@@ -6,9 +6,15 @@ use std::collections::HashSet;
 use util;
 use text_index::Indexable;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Book {
     filename: PathBuf,
+}
+
+impl Book {
+    pub fn from_path(path: &Path) -> Self {
+        Book { filename: PathBuf::from(path) }
+    }
 }
 
 impl Indexable for Book {
