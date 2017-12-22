@@ -1,5 +1,6 @@
 use std::collections::{HashSet, HashMap};
 use std::rc::Rc;
+use std::hash::Hash;
 
 struct WordIterator<'a> {
     source: &'a str,
@@ -45,30 +46,42 @@ impl<'a> Iterator for WordIterator<'a> {
     }
 }
 
-pub fn extract_words(text: &str) -> Vec<String> {
-    WordIterator::new(text).map(String::from).collect()
+pub trait Indexable: Eq + Hash {
+    fn extract_words(&self) -> Vec<String>;
 }
 
-pub struct TextIndex {
-    storage: HashMap<String, HashSet<Rc<String>>>,
+impl Indexable for String {
+    fn extract_words(&self) -> Vec<String> {
+        WordIterator::new(self).map(String::from).collect()
+    }
 }
 
-impl TextIndex {
+impl<'a> Indexable for &'a str {
+    fn extract_words(&self) -> Vec<String> {
+        WordIterator::new(self).map(String::from).collect()
+    }
+}
+
+pub struct TextIndex<T: Indexable> {
+    storage: HashMap<String, HashSet<Rc<T>>>,
+}
+
+impl<T: Indexable> TextIndex<T> {
     pub fn new() -> Self {
         TextIndex { storage: HashMap::new() }
     }
 
-    pub fn push(&mut self, text: &str) {
-        let text = Rc::new(String::from(text));
+    pub fn push(&mut self, indexable: T) {
+        let indexable = Rc::new(indexable);
 
-        for word in extract_words(&text) {
+        for word in indexable.extract_words() {
             let entry = self.storage.entry(word).or_insert(HashSet::new());
-            entry.insert(text.clone());
+            entry.insert(indexable.clone());
         }
     }
 
-    pub fn search(&self, query: &str) -> HashSet<&str> {
-        let query_words = extract_words(query).into_iter();
+    pub fn search(&self, query: &str) -> HashSet<&T> {
+        let query_words = query.extract_words().into_iter();
         let mut results = HashSet::new();
 
         for candidate in query_words.filter_map(|word| self.storage.get(&word)) {
@@ -77,6 +90,6 @@ impl TextIndex {
             }
         }
 
-        results.into_iter().map(Rc::as_ref).map(String::as_str).collect()
+        results.into_iter().map(Rc::as_ref).collect()
     }
 }
