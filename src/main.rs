@@ -1,3 +1,5 @@
+extern crate time;
+#[macro_use]
 extern crate searcher;
 
 use std::ffi::OsString;
@@ -6,20 +8,33 @@ use std::fs;
 use std::io;
 
 use searcher::book::Book;
-use searcher::text_index::TextIndex;
+use searcher::naive_text_index::TextIndex;
 
 fn main() {
     let mut books = vec![];
-    find_books(Path::new("/home/andrew/books/calibre"), &mut books).
+    find_books(Path::new("/home/andrew/test_books"), &mut books).
         expect("Couldn't read books from given directory");
 
     let mut book_index = TextIndex::new();
-    for book in books {
-        book_index.push(book);
-    }
+    measure!({
+        println!("\n> Pushing into index...");
+        for book in books {
+            debug!("Working on: {}", book);
+            book_index.push(book);
+        }
+    });
 
-    let search_results = book_index.search("Alexandria");
-    println!("{:?}", search_results);
+    let query = "Alexandria";
+
+    let search_results = measure!({
+        println!("\n> Searching for query: {}", query);
+        book_index.search(query)
+    });
+
+    println!("\n> Results: ");
+    for result in search_results {
+        println!("{}", result);
+    }
 }
 
 fn find_books(dir: &Path, books: &mut Vec<Book>) -> io::Result<()> {

@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::collections::HashSet;
+use std::fmt::{self, Display};
 
 use util;
 use text_index::Indexable;
@@ -14,6 +15,12 @@ pub struct Book {
 impl Book {
     pub fn from_path(path: &Path) -> Self {
         Book { filename: PathBuf::from(path) }
+    }
+}
+
+impl Display for Book {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.filename.file_name().unwrap().to_str().unwrap())
     }
 }
 

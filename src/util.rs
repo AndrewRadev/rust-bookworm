@@ -1,3 +1,25 @@
+#[macro_export]
+macro_rules! debug {
+    ( $( $expr:expr ),* ) => {
+        if ::std::env::var("DEBUG").is_ok() {
+            println!("[DEBUG] {}", format!($( $expr ),*));
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! measure {
+    ($block:block) => {
+        {
+            let start = time::PreciseTime::now();
+            let result = $block;
+            let end = time::PreciseTime::now();
+            println!("> Time: {}s", start.to(end));
+            result
+        }
+    }
+}
+
 pub struct WordIterator<'a> {
     source: &'a str,
 }

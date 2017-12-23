@@ -32,7 +32,6 @@ impl<T: Indexable> TextIndex<T> {
     }
 
     pub fn push(&mut self, indexable: T) {
-        println!("[DEBUG] Pushing into index: {:?}", indexable);
         let indexable = Rc::new(indexable);
 
         for word in indexable.extract_words() {
@@ -46,6 +45,7 @@ impl<T: Indexable> TextIndex<T> {
         let mut results = HashSet::new();
 
         for candidate in query_words.filter_map(|word| self.storage.get(&word)) {
+            debug!("Working on: {:?}", candidate);
             for result in candidate {
                 results.insert(result);
             }
