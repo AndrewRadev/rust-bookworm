@@ -1,4 +1,5 @@
 extern crate time;
+extern crate rustyline;
 #[macro_use]
 extern crate searcher;
 
@@ -6,6 +7,8 @@ use std::ffi::OsString;
 use std::path::Path;
 use std::fs;
 use std::io;
+
+use rustyline::error::ReadlineError;
 
 use searcher::book::Book;
 use searcher::naive_text_index::TextIndex;
@@ -24,16 +27,27 @@ fn main() {
         }
     });
 
-    let query = "Alexandria";
+    let mut rl = rustyline::Editor::<()>::new();
 
-    let search_results = measure!({
-        println!("\n> Searching for query: {}", query);
-        book_index.search(query)
-    });
+    loop {
+        match rl.readline("> ") {
+            Ok(query) => {
+                let search_results = measure!({
+                    println!("\n> Searching for query: {}", query);
+                    book_index.search(&query)
+                });
 
-    println!("\n> Results: ");
-    for result in search_results {
-        println!("{}", result);
+                println!("\n> Results: ");
+                for result in search_results {
+                    println!("{}", result);
+                }
+            },
+            Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => break,
+            Err(e) => {
+                println!("Error: {:?}", e);
+                break;
+            }
+        }
     }
 }
 

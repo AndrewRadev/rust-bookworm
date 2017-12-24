@@ -5,3 +5,4 @@ authors = ["Andrew Radev <andrey.radev@gmail.com>"]
 
 [dependencies]
 time = "*"
+rustyline = "*"

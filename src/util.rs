@@ -14,7 +14,7 @@ macro_rules! measure {
             let start = time::PreciseTime::now();
             let result = $block;
             let end = time::PreciseTime::now();
-            println!("> Time: {}s", start.to(end));
+            println!("=> Time: {}s", start.to(end));
             result
         }
     }
