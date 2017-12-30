@@ -7,8 +7,8 @@ extern crate bookworm;
 use rustyline::error::ReadlineError;
 use walkdir::WalkDir;
 
-use bookworm::book::Book;
-use bookworm::text_index::TextIndex;
+use searcher::book::Book;
+use searcher::text_index::TextIndex;
 
 fn main() {
     let book_directory = match std::env::args().nth(1) {

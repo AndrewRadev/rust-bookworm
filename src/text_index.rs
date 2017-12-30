@@ -6,31 +6,31 @@ use std::marker::PhantomData;
 
 use util::WordIterator;
 
-pub trait Indexable<I: Iterator>: Debug + Eq + Hash {
+pub trait Indexable<I: Iterator<Item=String>>: Debug + Eq + Hash {
     fn extract_words(&self) -> I;
 }
 
-impl<'a> Indexable<WordIterator<'a>> for String {
+impl<'a> Indexable<WordIterator<'a>> for &'a str {
     fn extract_words(&self) -> WordIterator<'a> {
-        WordIterator::new(self.as_ref())
+        WordIterator::new(self)
     }
 }
 
-pub struct TextIndex<I: Iterator, T: Indexable<I>> {
+pub struct TextIndex<I: Iterator<Item=String>, T: Indexable<I>> {
     storage: HashMap<String, HashSet<Rc<T>>>,
     phantom: PhantomData<I>,
 }
 
-impl<I: Iterator, T: Indexable<I>> TextIndex<I, T> {
+impl<I: Iterator<Item=String>, T: Indexable<I>> TextIndex<I, T> {
     pub fn new() -> Self {
-        TextIndex { storage: HashMap::new() }
+        TextIndex { storage: HashMap::new(), phantom: PhantomData }
     }
 
     pub fn push(&mut self, indexable: T) {
         let indexable = Rc::new(indexable);
 
         for word in indexable.extract_words() {
-            let entry = self.storage.entry(String::from(word)).or_insert(HashSet::new());
+            let entry = self.storage.entry(word).or_insert(HashSet::new());
             entry.insert(indexable.clone());
         }
     }
@@ -39,7 +39,7 @@ impl<I: Iterator, T: Indexable<I>> TextIndex<I, T> {
         let query_words = query.extract_words();
         let mut results = HashSet::new();
 
-        for candidate in query_words.filter_map(|word| self.storage.get(word)) {
+        for candidate in query_words.filter_map(|word| self.storage.get(&word)) {
             debug!("Working on: {:?}", candidate);
             for result in candidate {
                 results.insert(result);

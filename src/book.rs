@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, BufRead};
 use std::fmt::{self, Display};
 
 use util::WordIterator;
@@ -23,45 +23,60 @@ impl Display for Book {
     }
 }
 
-impl<'a> Indexable<BookWordIterator<'a>> for Book {
+impl<'a> Indexable<BookWordIterator> for Book {
     fn extract_words(&self) -> BookWordIterator {
         let file = File::open(&self.filename).
             expect(&format!("Couldn't open book: {}", self.filename.display()));
         let reader = BufReader::new(file);
 
-        BookWordIterator::new(self.filename, reader)
+        BookWordIterator::new(self.filename.clone(), reader)
     }
 }
 
-struct BookWordIterator<'a> {
+pub struct BookWordIterator {
     filename: PathBuf,
     reader: BufReader<File>,
-    words: WordIterator<'a>,
-    next_line: Option<String>
+    line_words: Vec<String>,
+    line_words_index: usize,
 }
 
-impl<'a> BookWordIterator<'a> {
+impl BookWordIterator {
     fn new(filename: PathBuf, reader: BufReader<File>) -> Self {
         BookWordIterator {
             filename, reader,
-            words: WordIterator::new(""),
-            next_line: None,
+            line_words: vec![],
+            line_words_index: 0,
+        }
+    }
+
+    fn read_next_line(&mut self) -> Option<Vec<String>> {
+        let mut next_line = String::new();
+        let bytes_read = self.reader.read_line(&mut next_line).
+            expect(&format!("Couldn't read lines from book: {}", self.filename.display()));
+
+        if bytes_read == 0 {
+            None
+        } else {
+            Some(WordIterator::new(&next_line).collect())
         }
     }
 }
 
-impl<'a> Iterator for BookWordIterator<'a> {
+impl Iterator for BookWordIterator {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
-        return None;
-        //if let Some(word) = self.words.next() {
-        //    return Some(word);
-        //}
+        if let Some(word) = self.line_words.get(self.line_words_index) {
+            self.line_words_index += 1;
+            return Some(word.clone());
+        }
 
-        //self.next_line = self.reader.lines().next()?.
-        //    expect(&format!("Couldn't read lines from book: {}", self.filename.display()));
-        //self.words = WordIterator::new(self.next_line);
-        //self.words.next()
+        self.line_words = self.read_next_line()?;
+        while self.line_words.len() <= 0 {
+            self.line_words = self.read_next_line()?;
+        }
+
+        self.line_words_index = 1;
+        self.line_words.get(0).map(String::clone)
     }
 }
