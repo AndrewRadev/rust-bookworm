@@ -1,10 +1,9 @@
 use std::path::{Path, PathBuf};
 use std::fs::File;
-use std::io::{BufReader, BufRead};
-use std::collections::HashSet;
+use std::io::BufReader;
 use std::fmt::{self, Display};
 
-use util;
+use util::WordIterator;
 use text_index::Indexable;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -24,18 +23,45 @@ impl Display for Book {
     }
 }
 
-impl Indexable for Book {
-    fn extract_words(&self) -> Vec<String> {
+impl<'a> Indexable<BookWordIterator<'a>> for Book {
+    fn extract_words(&self) -> BookWordIterator {
         let file = File::open(&self.filename).
             expect(&format!("Couldn't open book: {}", self.filename.display()));
         let reader = BufReader::new(file);
-        let mut words = HashSet::new();
 
-        for line in reader.lines() {
-            let line = line.expect(&format!("Couldn't read lines from book: {}", self.filename.display()));
-            words.extend(util::WordIterator::new(&line).map(String::from))
+        BookWordIterator::new(self.filename, reader)
+    }
+}
+
+struct BookWordIterator<'a> {
+    filename: PathBuf,
+    reader: BufReader<File>,
+    words: WordIterator<'a>,
+    next_line: Option<String>
+}
+
+impl<'a> BookWordIterator<'a> {
+    fn new(filename: PathBuf, reader: BufReader<File>) -> Self {
+        BookWordIterator {
+            filename, reader,
+            words: WordIterator::new(""),
+            next_line: None,
         }
+    }
+}
 
-        words.into_iter().collect()
+impl<'a> Iterator for BookWordIterator<'a> {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        return None;
+        //if let Some(word) = self.words.next() {
+        //    return Some(word);
+        //}
+
+        //self.next_line = self.reader.lines().next()?.
+        //    expect(&format!("Couldn't read lines from book: {}", self.filename.display()));
+        //self.words = WordIterator::new(self.next_line);
+        //self.words.next()
     }
 }

@@ -2,31 +2,26 @@ use std::collections::{HashSet, HashMap};
 use std::rc::Rc;
 use std::hash::Hash;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 
-use util;
+use util::WordIterator;
 
-pub trait Indexable: Debug + Eq + Hash {
-    fn extract_words(&self) -> Vec<String>;
+pub trait Indexable<I: Iterator>: Debug + Eq + Hash {
+    fn extract_words(&self) -> I;
 }
 
-impl Indexable for String {
-    // TODO needs to be an Iterator of some sort. Maybe when it uses Trigrams
-    fn extract_words(&self) -> Vec<String> {
-        util::WordIterator::new(self).map(String::from).collect()
+impl<'a> Indexable<WordIterator<'a>> for String {
+    fn extract_words(&self) -> WordIterator<'a> {
+        WordIterator::new(self.as_ref())
     }
 }
 
-impl<'a> Indexable for &'a str {
-    fn extract_words(&self) -> Vec<String> {
-        util::WordIterator::new(self).map(String::from).collect()
-    }
-}
-
-pub struct TextIndex<T: Indexable> {
+pub struct TextIndex<I: Iterator, T: Indexable<I>> {
     storage: HashMap<String, HashSet<Rc<T>>>,
+    phantom: PhantomData<I>,
 }
 
-impl<T: Indexable> TextIndex<T> {
+impl<I: Iterator, T: Indexable<I>> TextIndex<I, T> {
     pub fn new() -> Self {
         TextIndex { storage: HashMap::new() }
     }
@@ -35,16 +30,16 @@ impl<T: Indexable> TextIndex<T> {
         let indexable = Rc::new(indexable);
 
         for word in indexable.extract_words() {
-            let entry = self.storage.entry(word).or_insert(HashSet::new());
+            let entry = self.storage.entry(String::from(word)).or_insert(HashSet::new());
             entry.insert(indexable.clone());
         }
     }
 
     pub fn search(&self, query: &str) -> HashSet<&T> {
-        let query_words = query.extract_words().into_iter();
+        let query_words = query.extract_words();
         let mut results = HashSet::new();
 
-        for candidate in query_words.filter_map(|word| self.storage.get(&word)) {
+        for candidate in query_words.filter_map(|word| self.storage.get(word)) {
             debug!("Working on: {:?}", candidate);
             for result in candidate {
                 results.insert(result);

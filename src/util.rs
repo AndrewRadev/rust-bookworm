@@ -31,7 +31,7 @@ impl<'a> WordIterator<'a> {
 }
 
 impl<'a> Iterator for WordIterator<'a> {
-    type Item = &'a str;
+    type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut on_word = false;
@@ -51,7 +51,7 @@ impl<'a> Iterator for WordIterator<'a> {
             if let (Some(start), Some(end)) = (start, end) {
                 let word = &self.source[start .. end];
                 self.source = &self.source[end..];
-                return Some(word);
+                return Some(word.to_owned());
             }
 
             byte_index += c.len_utf8();
@@ -60,6 +60,6 @@ impl<'a> Iterator for WordIterator<'a> {
         let start = start?;
         let word = &self.source[start..];
         self.source = "";
-        Some(word)
+        Some(word.to_owned())
     }
 }
