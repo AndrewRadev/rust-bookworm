@@ -2,13 +2,13 @@ extern crate time;
 extern crate rustyline;
 extern crate walkdir;
 #[macro_use]
-extern crate searcher;
+extern crate bookworm;
 
 use rustyline::error::ReadlineError;
 use walkdir::WalkDir;
 
-use searcher::book::Book;
-use searcher::text_index::TextIndex;
+use bookworm::book::Book;
+use bookworm::text_index::TextIndex;
 
 fn main() {
     let book_directory = match std::env::args().nth(1) {
@@ -16,7 +16,7 @@ fn main() {
         None => {
             println!("No directory given.");
             println!("");
-            println!("USAGE: searcher <book-directory>");
+            println!("USAGE: bookworm <book-directory>");
             std::process::exit(1);
         },
     };

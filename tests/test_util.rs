@@ -1,5 +1,5 @@
-extern crate searcher;
-use searcher::util::*;
+extern crate bookworm;
+use bookworm::util::*;
 
 #[test]
 fn test_word_iterator() {

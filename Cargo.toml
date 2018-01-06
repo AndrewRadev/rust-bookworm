@@ -1,5 +1,5 @@
 [package]
-name = "searcher"
+name = "bookworm"
 version = "0.1.0"
 authors = ["Andrew Radev <andrey.radev@gmail.com>"]
 

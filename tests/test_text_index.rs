@@ -1,5 +1,5 @@
-extern crate searcher;
-use searcher::text_index::*;
+extern crate bookworm;
+use bookworm::text_index::*;
 
 macro_rules! set {
     ($($item:expr),*) => {
