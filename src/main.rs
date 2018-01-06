@@ -1,14 +1,11 @@
 extern crate time;
 extern crate rustyline;
+extern crate walkdir;
 #[macro_use]
 extern crate searcher;
 
-use std::ffi::OsString;
-use std::path::Path;
-use std::fs;
-use std::io;
-
 use rustyline::error::ReadlineError;
+use walkdir::WalkDir;
 
 use searcher::book::Book;
 use searcher::text_index::TextIndex;
@@ -24,9 +21,21 @@ fn main() {
         },
     };
 
-    let mut books = vec![];
-    find_books(Path::new(&book_directory), &mut books).
-        expect("Couldn't read books from given directory");
+    let walk_result: Result<Vec<_>, _> = WalkDir::new(&book_directory).into_iter().collect();
+    let books: Vec<_> = match walk_result {
+        Ok(entries) => {
+            entries.into_iter().
+                filter(|e| e.path().extension().map(|ext| ext == "txt").unwrap_or(false)).
+                map(|e| Book::from_path(e.path())).
+                collect()
+        },
+        Err(e) => {
+            println!("Couldn't parse files from directory: {}", book_directory);
+            println!("");
+            println!("{}", e);
+            std::process::exit(1);
+        }
+    };
 
     println!("> Found {} books", books.len());
 
@@ -61,22 +70,4 @@ fn main() {
             }
         }
     }
-}
-
-fn find_books(dir: &Path, books: &mut Vec<Book>) -> io::Result<()> {
-    if dir.is_dir() {
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let path = entry.path();
-            if path.is_dir() {
-                find_books(&path, books)?;
-            } else {
-                let path = entry.path();
-                if path.extension() == Some(&OsString::from("txt")) {
-                    books.push(Book::from_path(&path))
-                }
-            }
-        }
-    }
-    Ok(())
 }
