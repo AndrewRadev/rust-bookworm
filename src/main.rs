@@ -11,16 +11,28 @@ use std::io;
 use rustyline::error::ReadlineError;
 
 use searcher::book::Book;
-use searcher::naive_text_index::TextIndex;
+use searcher::text_index::TextIndex;
 
 fn main() {
+    let book_directory = match std::env::args().nth(1) {
+        Some(dir) => dir,
+        None => {
+            println!("No directory given.");
+            println!("");
+            println!("USAGE: searcher <book-directory>");
+            std::process::exit(1);
+        },
+    };
+
     let mut books = vec![];
-    find_books(Path::new("/home/andrew/test_books"), &mut books).
+    find_books(Path::new(&book_directory), &mut books).
         expect("Couldn't read books from given directory");
+
+    println!("> Found {} books", books.len());
 
     let mut book_index = TextIndex::new();
     measure!({
-        println!("\n> Pushing into index...");
+        println!("> Pushing into index...");
         for book in books {
             debug!("Working on: {}", book);
             book_index.push(book);
