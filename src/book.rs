@@ -37,7 +37,6 @@ pub struct BookWordIterator {
     filename: PathBuf,
     reader: BufReader<File>,
     line_words: Vec<String>,
-    line_words_index: usize,
 }
 
 impl BookWordIterator {
@@ -45,7 +44,6 @@ impl BookWordIterator {
         BookWordIterator {
             filename, reader,
             line_words: vec![],
-            line_words_index: 0,
         }
     }
 
@@ -66,9 +64,8 @@ impl Iterator for BookWordIterator {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(word) = self.line_words.get(self.line_words_index) {
-            self.line_words_index += 1;
-            return Some(word.clone());
+        if let Some(word) = self.line_words.pop() {
+            return Some(word);
         }
 
         self.line_words = self.read_next_line()?;
@@ -76,7 +73,6 @@ impl Iterator for BookWordIterator {
             self.line_words = self.read_next_line()?;
         }
 
-        self.line_words_index = 1;
-        self.line_words.get(0).map(String::clone)
+        self.line_words.pop()
     }
 }
