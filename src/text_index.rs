@@ -2,6 +2,7 @@ use std::collections::{HashSet, HashMap};
 use std::rc::Rc;
 use std::hash::Hash;
 use std::fmt::Debug;
+use std::iter::FromIterator;
 
 use util::WordIterator;
 
@@ -29,8 +30,9 @@ impl<T: Indexable> TextIndex<T> {
 
     pub fn push(&mut self, indexable: T) {
         let indexable = Rc::new(indexable);
+        let words: HashSet<String> = HashSet::from_iter(indexable.extract_words());
 
-        for word in indexable.extract_words() {
+        for word in words {
             let entry = self.storage.entry(word).or_insert(HashSet::new());
             entry.insert(indexable.clone());
         }
