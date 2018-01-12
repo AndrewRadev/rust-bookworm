@@ -6,7 +6,7 @@ use std::fmt::{self, Display};
 use util::WordIterator;
 use text_index::Indexable;
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Book {
     filename: PathBuf,
 }
