@@ -4,7 +4,6 @@ use std::collections::{HashSet, HashMap};
 use std::sync::{Arc, Mutex};
 use std::hash::Hash;
 use std::fmt::Debug;
-use std::iter::FromIterator;
 
 use util::WordIterator;
 
@@ -40,7 +39,7 @@ impl<T: 'static + Indexable + Clone + Send + Sync> TextIndex<T> {
         self.threadpool.execute(move || {
             let indexable = Arc::new(indexable);
             debug!("Working on: {:?}", indexable);
-            let words: HashSet<String> = HashSet::from_iter(indexable.extract_words());
+            let words: HashSet<_> = indexable.extract_words().collect();
 
             for word in words {
                 let indexable_clone = Arc::clone(&indexable);
