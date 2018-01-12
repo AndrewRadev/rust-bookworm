@@ -43,9 +43,9 @@ fn main() {
     measure!({
         println!("> Pushing into index...");
         for book in books {
-            debug!("Working on: {}", book);
             book_index.push(book);
         }
+        book_index.join();
     });
 
     let mut rl = rustyline::Editor::<()>::new();

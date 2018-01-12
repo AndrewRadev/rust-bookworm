@@ -7,3 +7,4 @@ authors = ["Andrew Radev <andrey.radev@gmail.com>"]
 time = "*"
 rustyline = "*"
 walkdir = "*"
+threadpool = "*"

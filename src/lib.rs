@@ -1,3 +1,5 @@
+extern crate threadpool;
+
 #[macro_use]
 pub mod util;
 pub mod text_index;
