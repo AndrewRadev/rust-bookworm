@@ -2,28 +2,29 @@ use std::collections::{HashSet, HashMap};
 use std::rc::Rc;
 use std::hash::Hash;
 use std::fmt::Debug;
-use std::marker::PhantomData;
 
 use util::WordIterator;
 
-pub trait Indexable<I: Iterator<Item=String>>: Debug + Eq + Hash {
-    fn extract_words(&self) -> I;
+pub trait Indexable: Debug + Eq + Hash {
+    type Words: Iterator<Item=String>;
+    fn extract_words(&self) -> Self::Words;
 }
 
-impl<'a> Indexable<WordIterator<'a>> for &'a str {
-    fn extract_words(&self) -> WordIterator<'a> {
+impl<'a> Indexable for &'a str {
+    type Words = WordIterator<'a>;
+
+    fn extract_words(&self) -> Self::Words {
         WordIterator::new(self)
     }
 }
 
-pub struct TextIndex<I: Iterator<Item=String>, T: Indexable<I>> {
+pub struct TextIndex<T: Indexable> {
     storage: HashMap<String, HashSet<Rc<T>>>,
-    phantom: PhantomData<I>,
 }
 
-impl<I: Iterator<Item=String>, T: Indexable<I>> TextIndex<I, T> {
+impl<T: Indexable> TextIndex<T> {
     pub fn new() -> Self {
-        TextIndex { storage: HashMap::new(), phantom: PhantomData }
+        TextIndex { storage: HashMap::new() }
     }
 
     pub fn push(&mut self, indexable: T) {

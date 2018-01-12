@@ -23,8 +23,10 @@ impl Display for Book {
     }
 }
 
-impl<'a> Indexable<BookWordIterator> for Book {
-    fn extract_words(&self) -> BookWordIterator {
+impl<'a> Indexable for Book {
+    type Words = BookWordIterator;
+
+    fn extract_words(&self) -> Self::Words {
         let file = File::open(&self.filename).
             expect(&format!("Couldn't open book: {}", self.filename.display()));
         let reader = BufReader::new(file);
