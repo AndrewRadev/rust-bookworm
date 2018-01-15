@@ -19,8 +19,8 @@ fn test_search_word() {
     index.push("one/five/six");
     index.push("five, six, seven");
 
-    assert_eq!(set!{&"one/five/six", &"one, two, three"}, index.search("one"));
-    assert_eq!(set!{&"five, six, seven", &"one/five/six"}, index.search("six"));
+    assert_eq!(set!{"one/five/six", "one, two, three"}, index.search("one"));
+    assert_eq!(set!{"five, six, seven", "one/five/six"}, index.search("six"));
 }
 
 #[test]
@@ -30,5 +30,5 @@ fn test_search_multiple_words() {
     index.push("two, three");
     index.push("four, five");
 
-    assert_eq!(set!{&"four, five", &"one, two"}, index.search("one + four"));
+    assert_eq!(set!{"four, five", "one, two"}, index.search("one + four"));
 }
