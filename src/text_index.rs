@@ -44,7 +44,7 @@ impl<T: 'static + Indexable + Clone + Send + Sync> TextIndex<T> {
             for word in words {
                 let indexable_clone = Arc::clone(&indexable);
                 let mut storage = storage.lock().unwrap();
-                let entry = storage.entry(word).or_insert(HashSet::new());
+                let entry = storage.entry(word).or_insert_with(HashSet::new);
                 entry.insert(indexable_clone);
             }
         });

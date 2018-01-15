@@ -9,7 +9,7 @@ macro_rules! debug {
 
 #[macro_export]
 macro_rules! measure {
-    ($block:block) => {
+    ($block:expr) => {
         {
             let start = time::PreciseTime::now();
             let result = $block;

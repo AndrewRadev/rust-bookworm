@@ -15,9 +15,9 @@ fn main() {
         Some(dir) => dir,
         None => {
             println!("No directory given.");
-            println!("");
+            println!();
             println!("USAGE: bookworm <book-directory>");
-            std::process::exit(1);
+            std::process::exit(1)
         },
     };
 
@@ -31,9 +31,9 @@ fn main() {
         },
         Err(e) => {
             println!("Couldn't parse files from directory: {}", book_directory);
-            println!("");
+            println!();
             println!("{}", e);
-            std::process::exit(1);
+            std::process::exit(1)
         }
     };
 
@@ -45,7 +45,7 @@ fn main() {
         for book in books {
             book_index.push(book);
         }
-        book_index.join();
+        book_index.join()
     });
 
     let mut rl = rustyline::Editor::<()>::new();

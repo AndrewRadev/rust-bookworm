@@ -71,7 +71,7 @@ impl Iterator for BookWordIterator {
         }
 
         self.line_words = self.read_next_line()?;
-        while self.line_words.len() <= 0 {
+        while self.line_words.is_empty() {
             self.line_words = self.read_next_line()?;
         }
 
